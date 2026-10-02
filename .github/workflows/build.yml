@@ -1,0 +1,16 @@
+name: AAPS CI
+on: [workflow_dispatch]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          git clone https://github.com .
+          mkdir -p $RUNNER_TEMP/keystore
+          echo "${{ secrets.KEYSTORE_SET }}" | base64 -d --ignore-garbage > $RUNNER_TEMP/keystore/keystore.jks
+          ./gradlew assemblefullRelease
+        env:
+          KEYSTORE_FILE: ${{ runner.temp }}/keystore/keystore.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
