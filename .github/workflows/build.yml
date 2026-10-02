@@ -52,7 +52,9 @@ jobs:
           echo "${{ secrets.KEYSTORE_SET }}" | base64 -d --ignore-garbage > $RUNNER_TEMP/keystore/keystore.jks
 
       - name: Build with Gradle
-        run: ./gradlew assemble${{ github.event.inputs.buildVariant }}
+        run: |
+          git clone --branch ${{ github.event.inputs.tagName }} https://github.com .
+          ./gradlew assemble${{ github.event.inputs.buildVariant }}
         env:
           KEYSTORE_FILE: ${{ runner.temp }}/keystore/keystore.jks
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
