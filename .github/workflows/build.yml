@@ -20,21 +20,11 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Decode keystore file
-        run: |
-          mkdir -p $RUNNER_TEMP/keystore
-          echo "${{ secrets.KEYSTORE_SET }}" | base64 -d --ignore-garbage > $RUNNER_TEMP/keystore/keystore.jks
-
-      - name: Build with Gradle
-        run: ./gradlew assemblefullRelease
-        env:
-          KEYSTORE_FILE: ${{ runner.temp }}/keystore/keystore.jks
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+      - name: Build Debug APK
+        run: ./gradlew assemblefullDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: AAPS-3.4.2.6
+          name: AAPS-Debug-3.4.2.6
           path: app/build/outputs/apk/**/*.apk
