@@ -1,1 +1,40 @@
+name: AAPS CI
 
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          repository: 'nightscout/AndroidAPS'
+          ref: '3.4.2.6'
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Decode keystore file
+        run: |
+          mkdir -p $RUNNER_TEMP/keystore
+          echo "${{ secrets.KEYSTORE_SET }}" | base64 -d --ignore-garbage > $RUNNER_TEMP/keystore/keystore.jks
+
+      - name: Build with Gradle
+        run: ./gradlew assemblefullRelease
+        env:
+          KEYSTORE_FILE: ${{ runner.temp }}/keystore/keystore.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: AAPS-3.4.2.6
+          path: app/build/outputs/apk/**/*.apk
